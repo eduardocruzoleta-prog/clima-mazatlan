@@ -122,3 +122,65 @@ input, select {
 input:focus, select:focus { border-color: var(--c1); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--c1) 25%, transparent); }
 
 .footer { padding: 32px 0; color: var(--muted); font-size: .9rem; text-align: center; }
+
+/* Fondo de cielo */
+body { background: var(--sky); background-attachment: fixed;}
+
+/* =========================================================
+   Tarjetas del clima
+   ========================================================= */
+.weather { display: grid; gap: 16px; margin-bottom: 16px; transition: opacity .3s; }
+
+.weather.loading { opacity: .55; pointer-events: none; }
+.weather.loading .card { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .6; } }
+.weather h2 { font-size: 1.05rem; margin-bottom: 14px; }
+.muted { margin: 0; color: var(--muted); }
+
+/* Clima actual: el fondo cambia de día a noche */
+.now {
+  display: grid; gap: 8px; align-content: start;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--c1) 22%, var(--surface-solid)), color-mix(in srgb, var(--c2) 18%, var(--surface-solid)));
+}
+.now.night { background: linear-gradient(135deg, color-mix(in srgb, var(--c1) 30%, var(--surface-solid)), color-mix(in srgb, var(--c3) 20%, var(--surface-solid))); }
+.now h1 { font-size: clamp(1.8rem, 6vw, 2.6rem); }
+.now-main { display: flex; align-items: center; gap: 12px; }
+.now-icon { font-size: 4rem; line-height: 1; animation: float 6s ease-in-out infinite; }
+@keyframes float { 50% { transform: translateY(-6px); } }
+.now-temp { margin: 0; font-family: var(--font-head); font-size: clamp(3.5rem, 14vw, 5.5rem); font-weight: 700; line-height: 1; }
+.now-text { margin: 0; font-size: 1.15rem; font-weight: 600; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0 0; }
+.stats div { padding: 10px; border-radius: var(--radius-sm); text-align: center; background: color-mix(in srgb, var(--surface-solid) 70%, transparent); }
+.stats dt { font-size: .75rem; color: var(--muted); }
+.stats dd { margin: 0; font-weight: 600; }
+
+/* Próximas horas: tira con desplazamiento horizontal */
+.hourly {
+  display: flex; gap: 8px; overflow-x: auto; list-style: none; margin: 0; padding: 0 0 8px;
+  scroll-snap-type: x mandatory;
+}
+.hourly li {
+  flex: 0 0 64px; display: grid; justify-items: center; gap: 4px; padding: 10px 4px;
+  border-radius: 999px; background: var(--bg-2); font-size: .85rem; scroll-snap-align: start;
+}
+.hourly li:first-child { background: var(--grad); color: var(--btn-text); }
+.h-icon { font-size: 1.4rem; }
+.h-temp { font-weight: 600; }
+
+/* Próximos días: barra de mínima a máxima de la semana */
+.daily { list-style: none; margin: 0; padding: 0; display: grid; }
+.daily li {
+  display: grid; grid-template-columns: 3rem 2rem 3.4rem 2.2rem 1fr 2.2rem; align-items: center; gap: 8px;
+  padding: 10px 2px; border-bottom: 1px solid var(--border);
+}
+.daily li:last-child { border-bottom: 0; }
+.d-day { font-weight: 600; }
+.d-icon { font-size: 1.3rem; text-align: center; }
+.d-rain { font-size: .8rem; color: var(--c2); }
+.d-min { color: var(--muted); text-align: right; }
+.d-max { font-weight: 600; }
+.d-bar { position: relative; height: 6px; border-radius: 6px; background: var(--bg-2); }
+.d-bar span {
+  position: absolute; top: 0; bottom: 0; left: var(--from); right: calc(100% - var(--to));
+  border-radius: 6px; background: linear-gradient(90deg, var(--c2), var(--c3));
+}

@@ -24,6 +24,37 @@
   </header>
 
   <main class="container">
+    <div id="message" class="message" role="status" aria-live="polite" hidden></div>
+
+    <section id="weather" class="weather" aria-busy="true">
+      <article id="now" class="card now">
+        <div>
+          <h1 id="place">Mazatlán</h1>
+          <p id="region" class="muted"></p>
+          <p id="date" class="muted"></p>
+        </div>
+        <div class="now-main">
+          <span id="now-icon" class="now-icon" aria-hidden="true"></span>
+          <p class="now-temp"><span id="now-temp">--</span>°</p>
+        </div>
+        <p id="now-text" class="now-text"></p>
+        <dl class="stats">
+          <div><dt>Sensación</dt><dd id="feels">--</dd></div>
+          <div><dt>Humedad</dt><dd id="humidity">--</dd></div>
+          <div><dt>Viento</dt><dd id="wind">--</dd></div>
+        </dl>
+      </article>
+
+      <article class="card">
+        <h2>Próximas 24 horas</h2>
+        <ol id="hourly" class="hourly"></ol>
+      </article>
+
+      <article class="card">
+        <h2>Próximos 7 días</h2>
+        <ol id="daily" class="daily"></ol>
+      </article>
+    </section>
 
   </main>
 
