@@ -213,3 +213,19 @@ body { background: var(--sky); background-attachment: fixed;}
   position: absolute; top: 0; bottom: 0; left: var(--from); right: calc(100% - var(--to));
   border-radius: 6px; background: linear-gradient(90deg, var(--c2), var(--c3));
 }
+
+
+/* =========================================================
+   Responsive (mobile first)
+   ========================================================= */
+@media (min-width: 801px) {
+  .search { margin: 32px 0 24px; }
+  .card { padding: 28px; }
+  .weather { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
+  .weather .now { grid-row: span 2; }
+}
+
+/* Accesibilidad: sin animaciones si el usuario lo pide */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
