@@ -213,6 +213,27 @@ function choosePlace(place) {
   loadWeather(place);
 }
 
+// ===== Usar la ubicación del dispositivo =====
+$('locate').addEventListener('click', () => {
+  if (!('geolocation' in navigator)) {
+    showMessage('Tu navegador no permite obtener la ubicación.');
+    return;
+  }
+  showMessage('Buscando tu ubicación…');
+  navigator.geolocation.getCurrentPosition(
+    pos => choosePlace({
+      name: 'Mi ubicación',
+      region: `${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)}`,
+      lat: pos.coords.latitude,
+      lon: pos.coords.longitude,
+    }),
+    err => showMessage(err.code === err.PERMISSION_DENIED
+      ? 'No diste permiso para usar tu ubicación.'
+      : 'No pude obtener tu ubicación.'),
+    { timeout: 10000 },
+  );
+});
+
 // ===== Inicio: el último lugar consultado o Mazatlán =====
 let startPlace = DEFAULT_PLACE;
 try { startPlace = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEFAULT_PLACE; } catch (e) {}
