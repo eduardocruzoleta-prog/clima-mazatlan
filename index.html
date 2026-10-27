@@ -24,6 +24,13 @@
   </header>
 
   <main class="container">
+    <form id="search" class="search" role="search">
+      <label for="city" class="sr-only">Buscar ciudad</label>
+      <input id="city" type="search" placeholder="Buscar ciudad (ej. Culiacán)" autocomplete="off" required>
+      <button class="btn" type="submit">Buscar</button>
+      <button id="locate" class="btn btn-ghost" type="button">📍 Mi ubicación</button>
+    </form>
+    <ul id="results" class="results" hidden></ul>
     <div id="message" class="message" role="status" aria-live="polite" hidden></div>
 
     <section id="weather" class="weather" aria-busy="true">

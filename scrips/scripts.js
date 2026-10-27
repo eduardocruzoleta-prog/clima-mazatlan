@@ -166,6 +166,53 @@ function renderDaily(daily) {
   $('daily').replaceChildren(...items);
 }
 
+// ===== Buscar ciudades =====
+$('search').addEventListener('submit', async e => {
+  e.preventDefault();
+  const query = cityInput.value.trim();
+  if (!query) return;
+  try {
+    const params = new URLSearchParams({ name: query, count: 5, language: 'es' });
+    const data = await fetchJSON(`${GEO_URL}?${params}`);
+    const places = (data.results || []).map(r => ({
+      name: r.name,
+      region: [r.admin1, r.country].filter(Boolean).join(', '),
+      lat: r.latitude,
+      lon: r.longitude,
+    }));
+    if (!places.length) {
+      showMessage(`No encontré "${query}". Revisa cómo está escrito.`);
+      return;
+    }
+    if (places.length === 1) choosePlace(places[0]);
+    else showResults(places);
+  } catch (err) {
+    showMessage(`No pude buscar la ciudad: ${err.message}.`);
+  }
+});
+
+// Si hay varias ciudades con el mismo nombre, se deja elegir
+function showResults(places) {
+  results.replaceChildren(...places.map(place => {
+    const btn = el('button', '', place.name);
+    btn.type = 'button';
+    btn.append(el('small', '', place.region));
+    btn.addEventListener('click', () => choosePlace(place));
+    const li = el('li');
+    li.append(btn);
+    return li;
+  }));
+  results.hidden = false;
+  showMessage('');
+  results.querySelector('button').focus();
+}
+
+function choosePlace(place) {
+  results.hidden = true;
+  cityInput.value = '';
+  loadWeather(place);
+}
+
 // ===== Inicio: el último lugar consultado o Mazatlán =====
 let startPlace = DEFAULT_PLACE;
 try { startPlace = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEFAULT_PLACE; } catch (e) {}
