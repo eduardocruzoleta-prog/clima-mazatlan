@@ -129,8 +129,8 @@ body { background: var(--sky); background-attachment: fixed;}
 /* =========================================================
    Tarjetas del clima
    ========================================================= */
-.weather { display: grid; gap: 16px; margin-bottom: 16px; transition: opacity .3s; }
-
+/* minmax(0, 1fr): sin esto, la tira de horas estira la columna y la página se sale de la pantalla */
+.weather { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; margin-bottom: 16px; transition: opacity .3s; }
 .weather.loading { opacity: .55; pointer-events: none; }
 .weather.loading .card { animation: pulse 1.2s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: .6; } }

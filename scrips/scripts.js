@@ -119,13 +119,16 @@ function renderCurrent(place, now) {
 }
 
 function renderHourly(hourly, nowTime) {
-  const items = hourly.time.slice(0, 24).map((time, i) => {
-    const { text, icon } = describe(hourly.weather_code[i], hourly.is_day[i]);
+  // La lista empieza a medianoche: hay que saltar a la hora actual
+  const start = Math.max(0, hourly.time.findIndex(t => t.slice(0, 13) === nowTime.slice(0, 13)));
+  const items = hourly.time.slice(start, start + 24).map((time, i) => {
+    const k = start + i;
+    const { text, icon } = describe(hourly.weather_code[k], hourly.is_day[k]);
     const li = el('li');
     li.append(
       el('span', 'h-time', i === 0 ? 'Ahora' : time.slice(11, 16)),
       el('span', 'h-icon', icon),
-      el('span', 'h-temp', `${Math.round(hourly.temperature_2m[i])}°`),
+      el('span', 'h-temp', `${Math.round(hourly.temperature_2m[k])}°`),
     );
     li.querySelector('.h-icon').setAttribute('aria-label', text);
     return li;
