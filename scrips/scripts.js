@@ -5,25 +5,48 @@ const GEO_URL = 'https://geocoding-api.open-meteo.com/v1/search';
 const STORAGE_KEY = 'clima-lugar';
 
 // Códigos del clima (WMO) → [texto, ícono de día, ícono de noche]
+// Los íconos son los <symbol id="i-..."> que están al inicio de index.html
 const WEATHER = {
-  0: ['Despejado', '☀️', '🌙'],
-  1: ['Mayormente despejado', '🌤️', '🌙'],
-  2: ['Parcialmente nublado', '⛅', '☁️'],
-  3: ['Nublado', '☁️'],
-  45: ['Niebla', '🌫️'], 48: ['Niebla con escarcha', '🌫️'],
-  51: ['Llovizna ligera', '🌦️'], 53: ['Llovizna', '🌦️'], 55: ['Llovizna intensa', '🌧️'],
-  56: ['Llovizna helada', '🌧️'], 57: ['Llovizna helada', '🌧️'],
-  61: ['Lluvia ligera', '🌦️'], 63: ['Lluvia', '🌧️'], 65: ['Lluvia intensa', '🌧️'],
-  66: ['Lluvia helada', '🌧️'], 67: ['Lluvia helada', '🌧️'],
-  71: ['Nevada ligera', '🌨️'], 73: ['Nevada', '🌨️'], 75: ['Nevada intensa', '❄️'], 77: ['Granizo fino', '🌨️'],
-  80: ['Chubascos ligeros', '🌦️'], 81: ['Chubascos', '🌧️'], 82: ['Chubascos fuertes', '⛈️'],
-  85: ['Chubascos de nieve', '🌨️'], 86: ['Chubascos de nieve', '❄️'],
-  95: ['Tormenta', '⛈️'], 96: ['Tormenta con granizo', '⛈️'], 99: ['Tormenta con granizo', '⛈️'],
+  0: ['Despejado', 'sun', 'moon'],
+  1: ['Mayormente despejado', 'cloud-sun', 'cloud-moon'],
+  2: ['Parcialmente nublado', 'cloud-sun', 'cloud-moon'],
+  3: ['Nublado', 'cloud'],
+  45: ['Niebla', 'fog'], 48: ['Niebla con escarcha', 'fog'],
+  51: ['Llovizna ligera', 'drizzle'], 53: ['Llovizna', 'drizzle'], 55: ['Llovizna intensa', 'rain'],
+  56: ['Llovizna helada', 'drizzle'], 57: ['Llovizna helada', 'rain'],
+  61: ['Lluvia ligera', 'drizzle'], 63: ['Lluvia', 'rain'], 65: ['Lluvia intensa', 'rain'],
+  66: ['Lluvia helada', 'rain'], 67: ['Lluvia helada', 'rain'],
+  71: ['Nevada ligera', 'snow'], 73: ['Nevada', 'snow'], 75: ['Nevada intensa', 'snow'], 77: ['Granizo fino', 'snow'],
+  80: ['Chubascos ligeros', 'drizzle'], 81: ['Chubascos', 'rain'], 82: ['Chubascos fuertes', 'storm'],
+  85: ['Chubascos de nieve', 'snow'], 86: ['Chubascos de nieve', 'snow'],
+  95: ['Tormenta', 'storm'], 96: ['Tormenta con granizo', 'storm'], 99: ['Tormenta con granizo', 'storm'],
+};
+
+// Qué cielo de fondo va con cada ícono (de noche siempre es 'night')
+const SKY = {
+  sun: 'clear', 'cloud-sun': 'clear', cloud: 'cloudy', fog: 'cloudy',
+  drizzle: 'rain', rain: 'rain', snow: 'snow', storm: 'storm',
 };
 
 function describe(code, isDay = 1) {
-  const [text, day, night] = WEATHER[code] || ['Sin datos', '❔'];
+  const [text, day, night] = WEATHER[code] || ['Sin datos', 'cloud'];
   return { text, icon: !isDay && night ? night : day };
+}
+
+// Crea <svg><use href="#i-sun"></use></svg>; si lleva texto, el lector de pantalla lo anuncia
+function icon(name, label) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+  use.setAttribute('href', `#i-${name}`);
+  svg.append(use);
+  svg.setAttribute('class', 'wx');
+  if (label) {
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', label);
+  } else {
+    svg.setAttribute('aria-hidden', 'true');
+  }
+  return svg;
 }
 
 // ===== Elementos de la página =====
@@ -84,7 +107,7 @@ async function loadWeather(place) {
     latitude: place.lat,
     longitude: place.lon,
     current: 'temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day',
-    hourly: 'temperature_2m,weather_code,is_day',
+    hourly: 'temperature_2m,weather_code,is_day,precipitation_probability',
     daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
     timezone: 'auto',
     forecast_days: 7,
@@ -103,19 +126,19 @@ async function loadWeather(place) {
 }
 
 function renderCurrent(place, now) {
-  const { text, icon } = describe(now.weather_code, now.is_day);
+  const { text, icon: name } = describe(now.weather_code, now.is_day);
   $('place').textContent = place.name;
   $('region').textContent = place.region;
   // La API manda la hora local de la ciudad, por ejemplo "2026-10-21T13:15"
   const date = new Date(now.time).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
   $('date').textContent = `${date} · ${now.time.slice(11, 16)} h`;
-  $('now-icon').textContent = icon;
+  $('now-icon').replaceChildren(icon(name));
   $('now-temp').textContent = Math.round(now.temperature_2m);
   $('now-text').textContent = text;
   $('feels').textContent = `${Math.round(now.apparent_temperature)}°`;
   $('humidity').textContent = `${now.relative_humidity_2m}%`;
   $('wind').textContent = `${Math.round(now.wind_speed_10m)} km/h`;
-  $('now').classList.toggle('night', !now.is_day);
+  document.body.dataset.sky = now.is_day ? SKY[name] || 'clear' : 'night';
 }
 
 function renderHourly(hourly, nowTime) {
@@ -123,14 +146,18 @@ function renderHourly(hourly, nowTime) {
   const start = Math.max(0, hourly.time.findIndex(t => t.slice(0, 13) === nowTime.slice(0, 13)));
   const items = hourly.time.slice(start, start + 24).map((time, i) => {
     const k = start + i;
-    const { text, icon } = describe(hourly.weather_code[k], hourly.is_day[k]);
+    const { text, icon: name } = describe(hourly.weather_code[k], hourly.is_day[k]);
+    const rain = hourly.precipitation_probability[k] ?? 0;
+    const h = icon(name, text);
+    h.classList.add('h-icon');
     const li = el('li');
     li.append(
       el('span', 'h-time', i === 0 ? 'Ahora' : time.slice(11, 16)),
-      el('span', 'h-icon', icon),
+      h,
       el('span', 'h-temp', `${Math.round(hourly.temperature_2m[k])}°`),
+      // Solo se muestra si hay probabilidad real de lluvia, para no llenar de ceros
+      el('span', 'h-rain', rain >= 20 ? `${rain}%` : ''),
     );
-    li.querySelector('.h-icon').setAttribute('aria-label', text);
     return li;
   });
   $('hourly').replaceChildren(...items);
@@ -143,27 +170,32 @@ function renderDaily(daily) {
   const items = daily.time.map((date, i) => {
     const min = daily.temperature_2m_min[i];
     const max = daily.temperature_2m_max[i];
-    const { text, icon } = describe(daily.weather_code[i]);
+    const { text, icon: name } = describe(daily.weather_code[i]);
+    const rain = daily.precipitation_probability_max[i] ?? 0;
     // Se usa el mediodía para que la zona horaria no cambie el día
-    const name = i === 0 ? 'Hoy' : new Date(`${date}T12:00`).toLocaleDateString('es-MX', { weekday: 'short' }).replace('.', '');
+    const day = i === 0 ? 'Hoy' : new Date(`${date}T12:00`).toLocaleDateString('es-MX', { weekday: 'short' }).replace('.', '');
     const bar = el('span', 'd-bar');
     const fill = el('span');
     fill.style.setProperty('--from', `${((min - weekMin) / range) * 100}%`);
     fill.style.setProperty('--to', `${((max - weekMin) / range) * 100}%`);
     bar.append(fill);
+    const d = icon(name, text);
+    d.classList.add('d-icon');
+    const drop = el('span', 'd-rain');
+    if (rain >= 20) drop.append(icon('drop'), `${rain}%`);
     const li = el('li');
     li.append(
-      el('span', 'd-day', name.charAt(0).toUpperCase() + name.slice(1)),
-      el('span', 'd-icon', icon),
-      el('span', 'd-rain', `💧 ${daily.precipitation_probability_max[i] ?? 0}%`),
+      el('span', 'd-day', day.charAt(0).toUpperCase() + day.slice(1)),
+      d,
+      drop,
       el('span', 'd-min', `${Math.round(min)}°`),
       bar,
       el('span', 'd-max', `${Math.round(max)}°`),
     );
-    li.querySelector('.d-icon').setAttribute('aria-label', text);
     return li;
   });
   $('daily').replaceChildren(...items);
+  $('now-range').textContent = `Máx. ${Math.round(daily.temperature_2m_max[0])}° · Mín. ${Math.round(daily.temperature_2m_min[0])}°`;
 }
 
 // ===== Buscar ciudades =====

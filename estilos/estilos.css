@@ -1,68 +1,90 @@
+
 /* =========================================================
    Identidad: cielo
-   Azul de cielo con acento de sol, formas muy redondeadas y un fondo que cambia de día a noche.
+   Azul de cielo con acento de sol, tarjetas de vidrio y un cielo que cambia según el clima.
    ========================================================= */
 :root {
+  /* Firma: igual en el portafolio y en los 3 proyectos */
   --sig: #ec4899;
+  /* Personalidad de este proyecto */
   --font-head: "Outfit", sans-serif;
   --font-body: "Nunito Sans", system-ui, sans-serif;
-  --radius: 24px;
-  --radius-sm: 14px;
+  --radius: 28px;
+  --radius-sm: 16px;
   --bg: #eaf4ff;
   --bg-2: #d7eafc;
-  --surface: rgb(255 255 255 / .72);
+  --surface: rgb(255 255 255 / .62);
   --surface-solid: #ffffff;
   --text: #0b2545;
   --muted: #4d6787;
-  --border: rgb(11 37 69 / .1);
+  --border: rgb(11 37 69 / .09);
   --c1: #0284c7;
   --c2: #38bdf8;
   --c3: #f59e0b;
   --grad: linear-gradient(120deg, var(--c1), var(--c2) 55%, var(--c3));
   --btn-text: #ffffff;
-  --shadow: 0 12px 32px -14px rgb(2 60 120 / .3);
+  --shadow: 0 18px 40px -22px rgb(2 60 120 / .35);
   --sky: linear-gradient(180deg, #cfe8ff 0%, #eaf4ff 45%, #fff4e0 100%);
+  /* Colores de los íconos y detalles del clima */
+  --chip: rgb(255 255 255 / .7);
+  --track: rgb(11 37 69 / .08);
+  --rain: #0369a1;
+  --cloud: #b9c6d8;
+  --cloud-dark: #8193ab;
+  --glow-mix: 40%;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #060f22;
     --bg-2: #0b1a35;
-    --surface: rgb(14 30 58 / .65);
+    --surface: rgb(14 30 58 / .55);
     --surface-solid: #0f2347;
     --text: #e4eeff;
     --muted: #93a8c8;
-    --border: rgb(255 255 255 / .09);
+    --border: rgb(255 255 255 / .08);
     --c1: #60a5fa;
     --c2: #7dd3fc;
     --c3: #fbbf24;
     --btn-text: #06122a;
-    --shadow: 0 12px 36px -12px rgb(0 0 0 / .65);
+    --shadow: 0 18px 40px -18px rgb(0 0 0 / .7);
     --sky: linear-gradient(180deg, #030a18 0%, #071530 50%, #0d1f45 100%);
+    --chip: rgb(255 255 255 / .05);
+    --track: rgb(255 255 255 / .08);
+    --rain: #7dd3fc;
+    --cloud: #e2e8f0;
+    --cloud-dark: #94a3b8;
+    --glow-mix: 18%;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #060f22;
   --bg-2: #0b1a35;
-  --surface: rgb(14 30 58 / .65);
+  --surface: rgb(14 30 58 / .55);
   --surface-solid: #0f2347;
   --text: #e4eeff;
   --muted: #93a8c8;
-  --border: rgb(255 255 255 / .09);
+  --border: rgb(255 255 255 / .08);
   --c1: #60a5fa;
   --c2: #7dd3fc;
   --c3: #fbbf24;
   --btn-text: #06122a;
-  --shadow: 0 12px 36px -12px rgb(0 0 0 / .65);
+  --shadow: 0 18px 40px -18px rgb(0 0 0 / .7);
   --sky: linear-gradient(180deg, #030a18 0%, #071530 50%, #0d1f45 100%);
+  --chip: rgb(255 255 255 / .05);
+  --track: rgb(255 255 255 / .08);
+  --rain: #7dd3fc;
+  --cloud: #e2e8f0;
+  --cloud-dark: #94a3b8;
+  --glow-mix: 18%;
   color-scheme: dark;
 }
 
 
-/* =======================
-            Base 
-   ======================= */
+/* =========================================================
+   Base compartida: igual en los 3 proyectos (la firma)
+   ========================================================= */
 * { box-sizing: border-box; }
 body {
   margin: 0;
@@ -123,15 +145,48 @@ input:focus, select:focus { border-color: var(--c1); outline: none; box-shadow: 
 
 .footer { padding: 32px 0; color: var(--muted); font-size: .9rem; text-align: center; }
 
-/* Fondo de cielo */
-body { background: var(--sky); background-attachment: fixed;}
+
+/* =========================================================
+   Cielo dinámico: el JS pone data-sky en <body> según el clima
+   ========================================================= */
+/* @property deja que los colores cambien con transición suave */
+@property --glow { syntax: '<color>'; inherits: true; initial-value: #fbbf24; }
+@property --now-a { syntax: '<color>'; inherits: true; initial-value: #0c4a6e; }
+@property --now-b { syntax: '<color>'; inherits: true; initial-value: #0369a1; }
+
+body[data-sky="clear"]  { --glow: #fbbf24; --now-a: #0c4a6e; --now-b: #0369a1; }
+body[data-sky="cloudy"] { --glow: #94a3b8; --now-a: #1e293b; --now-b: #475569; }
+body[data-sky="rain"]   { --glow: #60a5fa; --now-a: #172554; --now-b: #1d4ed8; }
+body[data-sky="storm"]  { --glow: #a78bfa; --now-a: #1e1b4b; --now-b: #5b21b6; }
+body[data-sky="snow"]   { --glow: #a5f3fc; --now-a: #164e63; --now-b: #0e7490; }
+body[data-sky="night"]  { --glow: #818cf8; --now-a: #0b1437; --now-b: #3730a3; }
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(900px 520px at 85% -10%, color-mix(in srgb, var(--glow) var(--glow-mix), transparent), transparent 70%),
+    var(--sky);
+  background-attachment: fixed;
+  transition: --glow 1.2s, --now-a 1.2s, --now-b 1.2s, color .4s;
+}
+
+/* Clase para los íconos del clima: traen sus propios colores */
+.wx { fill: none; stroke: none; }
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.logo { display: inline-flex; align-items: center; gap: 6px; }
+.logo-icon { width: 34px; height: 34px; }
 
 
 /* =========================================================
    Búsqueda y mensajes
    ========================================================= */
-.search { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
-.search input { flex: 1 1 200px; }
+.search { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; margin: 12px 0 16px; }
+.field { position: relative; }
+.field svg { position: absolute; z-index: 1; left: 14px; top: 50%; translate: 0 -50%; color: var(--muted); pointer-events: none; }
+.field input { width: 100%; height: 48px; padding-left: 44px; background: var(--surface); backdrop-filter: blur(12px); box-shadow: var(--shadow); }
+.search .btn, .search .locate { height: 48px; }
+.search .locate { width: 48px; color: var(--c1); backdrop-filter: blur(12px); }
+
 .results {
   list-style: none; margin: 0 0 16px; padding: 6px; display: grid; gap: 4px;
   border-radius: var(--radius-sm); background: var(--surface-solid); border: 1px solid var(--border); box-shadow: var(--shadow);
@@ -147,71 +202,104 @@ body { background: var(--sky); background-attachment: fixed;}
 .message {
   display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
   padding: 12px 16px; margin-bottom: 16px; border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--c3) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--c3) 35%, transparent);
+  background: color-mix(in srgb, var(--c3) 14%, var(--surface-solid));
+  border: 1px solid color-mix(in srgb, var(--c3) 40%, transparent);
 }
 /* display: flex le gana a hidden; esta regla lo vuelve a ocultar */
 .message[hidden] { display: none; }
-
 
 
 /* =========================================================
    Tarjetas del clima
    ========================================================= */
 /* minmax(0, 1fr): sin esto, la tira de horas estira la columna y la página se sale de la pantalla */
-.weather { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; margin-bottom: 16px; transition: opacity .3s; }
-.weather.loading { opacity: .55; pointer-events: none; }
-.weather.loading .card { animation: pulse 1.2s ease-in-out infinite; }
-@keyframes pulse { 50% { opacity: .6; } }
-.weather h2 { font-size: 1.05rem; margin-bottom: 14px; }
-.muted { margin: 0; color: var(--muted); }
+.weather { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; margin-bottom: 16px; }
+.weather .card { position: relative; overflow: hidden; backdrop-filter: blur(16px); box-shadow: var(--shadow); }
+.weather h2 { font-size: .8rem; font-family: var(--font-body); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
 
-/* Clima actual: el fondo cambia de día a noche */
-.now {
-  display: grid; gap: 8px; align-content: start;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--c1) 22%, var(--surface-solid)), color-mix(in srgb, var(--c2) 18%, var(--surface-solid)));
+/* Al terminar de cargar, las tarjetas suben una tras otra */
+.weather:not(.loading) .card { animation: rise .6s cubic-bezier(.2, .8, .2, 1) both; }
+.weather .card:nth-child(2) { animation-delay: .08s; }
+.weather .card:nth-child(3) { animation-delay: .16s; }
+@keyframes rise { from { opacity: 0; transform: translateY(16px); } }
+
+/* Mientras carga: un brillo recorre las tarjetas */
+.weather.loading { pointer-events: none; }
+.weather.loading .card::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / .22) 50%, transparent 80%);
+  background-size: 250% 100%; animation: shimmer 1.3s linear infinite;
 }
-.now.night { background: linear-gradient(135deg, color-mix(in srgb, var(--c1) 30%, var(--surface-solid)), color-mix(in srgb, var(--c3) 20%, var(--surface-solid))); }
-.now h1 { font-size: clamp(1.8rem, 6vw, 2.6rem); }
-.now-main { display: flex; align-items: center; gap: 12px; }
-.now-icon { font-size: 4rem; line-height: 1; animation: float 6s ease-in-out infinite; }
-@keyframes float { 50% { transform: translateY(-6px); } }
-.now-temp { margin: 0; font-family: var(--font-head); font-size: clamp(3.5rem, 14vw, 5.5rem); font-weight: 700; line-height: 1; }
-.now-text { margin: 0; font-size: 1.15rem; font-weight: 600; }
-.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0 0; }
-.stats div { padding: 10px; border-radius: var(--radius-sm); text-align: center; background: color-mix(in srgb, var(--surface-solid) 70%, transparent); }
-.stats dt { font-size: .75rem; color: var(--muted); }
-.stats dd { margin: 0; font-weight: 600; }
+@keyframes shimmer { from { background-position: 150% 0; } to { background-position: -100% 0; } }
+
+/* Clima actual: sus colores cambian con el cielo */
+.now {
+  display: grid; gap: 6px; align-content: space-between;
+  color: #fff; border: 0;
+  --cloud: #f8fafc; --cloud-dark: #cbd5e1;
+  background:
+    radial-gradient(circle at 92% 8%, color-mix(in srgb, var(--glow) 50%, transparent), transparent 45%),
+    linear-gradient(155deg, var(--now-a), var(--now-b));
+  box-shadow: 0 28px 50px -24px color-mix(in srgb, var(--now-b) 80%, transparent);
+}
+.now h1 { font-size: clamp(1.7rem, 6vw, 2.3rem); }
+.now-sub { margin: 0; color: rgb(255 255 255 / .85); }
+.now-sub:first-letter { text-transform: uppercase; }
+.now-main { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
+.now-temp {
+  margin: 0; font-family: var(--font-head); font-weight: 200; line-height: .9; letter-spacing: -.04em;
+  font-size: clamp(5rem, 24vw, 8rem);
+}
+.now-icon { width: clamp(100px, 32vw, 160px); aspect-ratio: 1; flex: none; filter: drop-shadow(0 12px 18px rgb(0 0 0 / .25)); animation: float 6s ease-in-out infinite; }
+.now-icon svg { width: 100%; height: 100%; }
+@keyframes float { 50% { transform: translateY(-8px); } }
+.now-text { margin: 0; font-family: var(--font-head); font-size: 1.35rem; font-weight: 500; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 14px 0 0; }
+.stats div { padding: 12px 6px; border-radius: var(--radius-sm); text-align: center; background: rgb(255 255 255 / .1); border: 1px solid rgb(255 255 255 / .14); }
+.stats dt { display: flex; align-items: center; justify-content: center; gap: 4px; font-size: .78rem; }
+.stats dt svg { width: 14px; height: 14px; }
+.stats dd { margin: 2px 0 0; font-family: var(--font-head); font-size: 1.2rem; font-weight: 500; }
 
 /* Próximas horas: tira con desplazamiento horizontal */
 .hourly {
-  display: flex; gap: 8px; overflow-x: auto; list-style: none; margin: 0; padding: 0 0 8px;
-  scroll-snap-type: x mandatory;
+  display: flex; gap: 8px; overflow-x: auto; list-style: none; margin: 0; padding: 2px 2px 10px;
+  scroll-snap-type: x mandatory; scrollbar-width: thin;
 }
 .hourly li {
-  flex: 0 0 64px; display: grid; justify-items: center; gap: 4px; padding: 10px 4px;
-  border-radius: 999px; background: var(--bg-2); font-size: .85rem; scroll-snap-align: start;
+  flex: 0 0 68px; display: grid; justify-items: center; gap: 2px; padding: 12px 4px;
+  border-radius: 999px; background: var(--chip); border: 1px solid var(--border);
+  font-size: .85rem; scroll-snap-align: start;
 }
-.hourly li:first-child { background: var(--grad); color: var(--btn-text); }
-.h-icon { font-size: 1.4rem; }
-.h-temp { font-weight: 600; }
+/* "Ahora" usa los mismos colores que la tarjeta principal */
+.hourly li:first-child {
+  color: #fff; border-color: transparent; font-weight: 700;
+  background: linear-gradient(180deg, var(--now-a), var(--now-b));
+  --cloud: #f8fafc; --cloud-dark: #cbd5e1; --rain: #bae6fd;
+}
+.h-time { color: inherit; opacity: .8; }
+.h-icon { width: 36px; height: 36px; }
+.h-temp { font-family: var(--font-head); font-size: 1.05rem; font-weight: 500; }
+.h-rain { min-height: 1.2em; font-size: .72rem; font-weight: 700; color: var(--rain); }
 
 /* Próximos días: barra de mínima a máxima de la semana */
 .daily { list-style: none; margin: 0; padding: 0; display: grid; }
 .daily li {
-  display: grid; grid-template-columns: 3rem 2rem 3.4rem 2.2rem 1fr 2.2rem; align-items: center; gap: 8px;
-  padding: 10px 2px; border-bottom: 1px solid var(--border);
+  display: grid; grid-template-columns: 2.8rem 2.2rem 3rem 2rem minmax(0, 1fr) 2rem; align-items: center; gap: 8px;
+  padding: 10px 6px; border-bottom: 1px solid var(--border);
 }
 .daily li:last-child { border-bottom: 0; }
-.d-day { font-weight: 600; }
-.d-icon { font-size: 1.3rem; text-align: center; }
-.d-rain { font-size: .8rem; color: var(--c2); }
+.d-day { font-weight: 700; }
+.d-icon { width: 32px; height: 32px; }
+.d-rain { display: inline-flex; align-items: center; gap: 2px; font-size: .78rem; font-weight: 700; color: var(--rain); }
+.d-rain svg { width: 12px; height: 12px; fill: currentColor; stroke: none; }
 .d-min { color: var(--muted); text-align: right; }
-.d-max { font-weight: 600; }
-.d-bar { position: relative; height: 6px; border-radius: 6px; background: var(--bg-2); }
+.d-max { font-weight: 700; }
+.d-bar { position: relative; height: 6px; border-radius: 6px; background: var(--track); }
+/* El degradado va de frío a calor en toda la semana; clip-path deja ver solo el tramo de ese día */
 .d-bar span {
-  position: absolute; top: 0; bottom: 0; left: var(--from); right: calc(100% - var(--to));
-  border-radius: 6px; background: linear-gradient(90deg, var(--c2), var(--c3));
+  position: absolute; inset: 0; border-radius: 6px;
+  background: linear-gradient(90deg, #38bdf8, #a3e635, #facc15, #f97316);
+  clip-path: inset(0 calc(100% - var(--to)) 0 var(--from) round 6px);
 }
 
 
@@ -219,10 +307,10 @@ body { background: var(--sky); background-attachment: fixed;}
    Responsive (mobile first)
    ========================================================= */
 @media (min-width: 801px) {
-  .search { margin: 32px 0 24px; }
+  .search { margin: 28px 0 24px; max-width: 640px; }
   .card { padding: 28px; }
-  .weather { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
-  .weather .now { grid-row: span 2; }
+  .weather { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; }
+  .weather .now { grid-row: span 2; padding: 32px; }
 }
 
 /* Accesibilidad: sin animaciones si el usuario lo pide */
